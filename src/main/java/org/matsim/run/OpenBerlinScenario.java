@@ -8,6 +8,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.application.MATSimApplication;
 import org.matsim.application.options.SampleOptions;
+import org.matsim.contrib.roadpricing.RoadPricingModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.ReplanningConfigGroup;
@@ -16,6 +17,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.TravelTime;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.prepare.RunOpenBerlinCalibration;
 import org.matsim.prepare.population.AssignIncome;
 import org.matsim.run.scoring.AdvancedScoringConfigGroup;
@@ -23,6 +25,9 @@ import org.matsim.run.scoring.AdvancedScoringModule;
 import org.matsim.simwrapper.SimWrapperConfigGroup;
 import org.matsim.simwrapper.SimWrapperModule;
 import picocli.CommandLine;
+import org.matsim.contrib.roadpricing.RoadPricingConfigGroup;
+import org.matsim.contrib.roadpricing.RoadPricingUtils;
+import org.matsim.contrib.roadpricing.RoadPricingScheme;
 
 import java.util.List;
 
@@ -37,7 +42,8 @@ public class OpenBerlinScenario extends MATSimApplication {
 	private final SampleOptions sample = new SampleOptions(10, 25, 3, 1);
 
 	public OpenBerlinScenario() {
-		super(String.format("input/v%s/berlin-v%s.config.xml", VERSION, VERSION));
+		//super(String.format("input/v6.1/berlin-v6.1.config.xml", VERSION, VERSION));
+		super(String.format("D:\\2024SS\\Matsim\\matsim-berlin\\input\\v6.1\\berlin-v6.1-roadpricing.config.xml"));
 	}
 
 	public static void main(String[] args) {
@@ -119,6 +125,11 @@ public class OpenBerlinScenario extends MATSimApplication {
 
 		if (ConfigUtils.hasModule(controler.getConfig(), AdvancedScoringConfigGroup.class)) {
 			controler.addOverridingModule(new AdvancedScoringModule());
+		}
+
+		if (ConfigUtils.hasModule(controler.getConfig(), RoadPricingConfigGroup.class)) {
+			RoadPricingScheme scheme =  RoadPricingUtils.loadRoadPricingSchemeAccordingToRoadPricingConfig(controler.getScenario());
+			controler.addOverridingModule(new RoadPricingModule(scheme));
 		}
 	}
 
