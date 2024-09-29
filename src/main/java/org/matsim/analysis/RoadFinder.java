@@ -72,9 +72,9 @@ public class RoadFinder {
 		// Find all links whose both ends are within the polygon
 		Set<Id<Link>> linkIdsWithinPolygon = new HashSet<>();
 		for (Link link : network.getLinks().values()) {
-			//if (!link.getAllowedModes().contains("car")) {
-			//	continue;
-			//}
+			if (!link.getAllowedModes().contains("car")) {
+				continue;
+			}
 			Node fromNode = link.getFromNode();
 			Node toNode = link.getToNode();
 			if (polygon.contains(geometryFactory.createPoint(new Coordinate(fromNode.getCoord().getX(), fromNode.getCoord().getY())))

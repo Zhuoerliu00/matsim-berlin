@@ -43,7 +43,9 @@ public class OpenBerlinScenario extends MATSimApplication {
 
 	public OpenBerlinScenario() {
 		//super(String.format("input/v6.1/berlin-v6.1.config.xml", VERSION, VERSION));
-		super(String.format("D:\\2024SS\\Matsim\\matsim-berlin\\input\\v6.1\\berlin-v6.1-roadpricing.config.xml"));
+		//super(String.format("D:\\2024SS\\Matsim\\matsim-berlin\\input\\v6.1\\berlin-v6.1-roadpricing.config.xml"));
+		super(String.format("input/berlin-v6.1-roadpricing.config.xml"));
+		//super(String.format("D:\\2024SS\\Matsim\\HA2\\roadpricing-berlin.xml"));
 	}
 
 	public static void main(String[] args) {

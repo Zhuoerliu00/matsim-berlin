@@ -11,7 +11,7 @@ public final class RunOpenBerlinScenario {
 	}
 
 	public static void main(String[] args) {
-		System.setProperty("java.opts", "-Xms4g -Xmx8g");
+		System.setProperty("java.opts", "-Xms16g -Xmx8g");
 		MATSimApplication.runWithDefaults(OpenBerlinScenario.class, args);
 	}
 
