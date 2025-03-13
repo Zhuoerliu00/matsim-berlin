@@ -7,6 +7,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.application.MATSimApplication;
 import org.matsim.application.prepare.population.PersonNetworkLinkCheck;
+import org.matsim.contrib.bicycle.BicycleConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.algorithms.ParallelPersonAlgorithmUtils;
@@ -24,7 +25,7 @@ import java.util.Set;
  */
 public class GartenfeldScenario extends OpenBerlinScenario {
 
-	@CommandLine.Option(names = "--gartenfeld-config", description = "Path to configuration for Gartenfeld.", defaultValue = "input/gartenfeld/gartenfeld.xml")
+	@CommandLine.Option(names = "--gartenfeld-config", description = "Path to configuration for Gartenfeld.", defaultValue = "input/gartenfeld/gartenfeld_base.xml")
 	private String gartenFeldConfig;
 
 	@CommandLine.Option(names = "--parking-garages", description = "Enable parking garages.", defaultValue = "NO_GARAGE")
@@ -39,7 +40,8 @@ public class GartenfeldScenario extends OpenBerlinScenario {
 
 		// Load the Gartenfeld specific part into the standard Berlin config
 		ConfigUtils.loadConfig(config, gartenFeldConfig);
-
+		BicycleConfigGroup bicycleConfigGroup = new BicycleConfigGroup();
+		config.addModule(bicycleConfigGroup);
 		return config;
 	}
 
