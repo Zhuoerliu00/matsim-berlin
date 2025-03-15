@@ -1,5 +1,7 @@
 package org.matsim.policies.gartenfeld;
 
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -8,13 +10,24 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.application.MATSimApplication;
 import org.matsim.application.prepare.population.PersonNetworkLinkCheck;
 import org.matsim.contrib.bicycle.BicycleConfigGroup;
+import org.matsim.contrib.bicycle.BicycleLinkSpeedCalculator;
+import org.matsim.contrib.bicycle.BicycleLinkSpeedCalculatorDefaultImpl;
+import org.matsim.contrib.bicycle.BicycleTravelTime;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.population.algorithms.ParallelPersonAlgorithmUtils;
+import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
+import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutilityFactory;
+import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
+import org.matsim.core.router.util.TravelTime;
+import org.matsim.run.Activities;
 import org.matsim.run.OpenBerlinScenario;
 import picocli.CommandLine;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -42,6 +55,38 @@ public class GartenfeldScenario extends OpenBerlinScenario {
 		ConfigUtils.loadConfig(config, gartenFeldConfig);
 		BicycleConfigGroup bicycleConfigGroup = new BicycleConfigGroup();
 		config.addModule(bicycleConfigGroup);
+		config.qsim().setUsingTravelTimeCheckInTeleportation(true);
+		Activities.addScoringParams(config,true);
+		// Required for all calibration strategies
+		for (String subpopulation : List.of("person", "freight", "goodsTraffic", "commercialPersonTraffic", "commercialPersonTraffic_service")) {
+			config.replanning().addStrategySettings(
+				new ReplanningConfigGroup.StrategySettings()
+					.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta)
+					.setWeight(1.0)
+					.setSubpopulation(subpopulation)
+			);
+
+			config.replanning().addStrategySettings(
+				new ReplanningConfigGroup.StrategySettings()
+					.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute)
+					.setWeight(0.15)
+					.setSubpopulation(subpopulation)
+			);
+		}
+
+		config.replanning().addStrategySettings(
+			new ReplanningConfigGroup.StrategySettings()
+				.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator)
+				.setWeight(0.15)
+				.setSubpopulation("person")
+		);
+
+		config.replanning().addStrategySettings(
+			new ReplanningConfigGroup.StrategySettings()
+				.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice)
+				.setWeight(0.15)
+				.setSubpopulation("person")
+		);
 		return config;
 	}
 
@@ -91,6 +136,7 @@ public class GartenfeldScenario extends OpenBerlinScenario {
 			);
 
 		}
+
 	}
 
 	public enum GarageType {
