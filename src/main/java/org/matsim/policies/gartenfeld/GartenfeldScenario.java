@@ -38,7 +38,7 @@ import java.util.Set;
  */
 public class GartenfeldScenario extends OpenBerlinScenario {
 
-	@CommandLine.Option(names = "--gartenfeld-config", description = "Path to configuration for Gartenfeld.", defaultValue = "input/gartenfeld/gartenfeld_base.xml")
+	@CommandLine.Option(names = "--gartenfeld-config", description = "Path to configuration for Gartenfeld.", defaultValue = "input/gartenfeld/gartenfeld_roller.xml")
 	private String gartenFeldConfig;
 
 	@CommandLine.Option(names = "--parking-garages", description = "Enable parking garages.", defaultValue = "NO_GARAGE")
