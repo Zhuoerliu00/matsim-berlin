@@ -119,9 +119,4 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
     }
 
 
-
-	public static String removeSharingPrefix(String mode) {
-		return mode.replace("sharing_", "");
-	}
-
 }
