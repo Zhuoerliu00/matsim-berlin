@@ -60,8 +60,9 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 		serviceConfig.setMaximumAccessEgressDistance(2000);
 		serviceConfig.setServiceInputFile("shared_roller_vehicles_stations.xml");
 		serviceConfig.setMode("roller");
-		serviceConfig.setBaseFare(0);
-		serviceConfig.setTimeFare(0.1 / 60);
+		serviceConfig.setBaseFare(0.75);
+		serviceConfig.setTimeFare(0.0);
+		serviceConfig.setDistanceFare(0.0008);
 
 		sharingConfig.addService(serviceConfig);
 
