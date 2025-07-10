@@ -4,6 +4,8 @@ package org.matsim.policies.gartenfeld;
 import com.google.inject.Provider;
 import com.google.inject.name.Names;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.application.MATSimApplication;
 import org.matsim.contrib.shared_mobility.run.SharingConfigGroup;
 import org.matsim.contrib.shared_mobility.run.SharingModule;
@@ -15,6 +17,8 @@ import org.matsim.core.config.groups.RoutingConfigGroup;
 import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.replanning.modules.SubtourModeChoice;
+import org.matsim.core.router.DefaultAnalysisMainModeIdentifier;
+import org.matsim.core.router.MainModeIdentifier;
 import org.matsim.core.router.RoutingModule;
 import org.matsim.core.router.TeleportationRoutingModule;
 import org.matsim.core.controler.AbstractModule;
@@ -35,7 +39,7 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 			"--config:network.inputNetworkFile", "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/gartenfeld/input/gartenfeld-v6.4.network.xml.gz",
 			"--config:plans.inputPlansFile", "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/gartenfeld/input/gartenfeld-v6.4.population-full-1pct.xml.gz",
 			"--config:controller.lastIteration", "5",
-			"--config:controller.outputDirectory", "output/gartenfeld-v6.4.full-roller-1pct/"
+			"--config:controller.outputDirectory", "output/gartenfeld-v6.4.full-roller-1pct-test/"
         );
     }
 
@@ -48,6 +52,8 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
     @Override
     protected Config prepareConfig(Config config) {
 		config = super.prepareConfig(config);
+		// Disable default listeners that crash on unknown modes
+		config.controller().setCreateGraphs(false);
 
 		// Add sharing config module
 		SharingConfigGroup sharingConfig = new SharingConfigGroup();
@@ -98,7 +104,6 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
         super.prepareControler(controler);
 		// Important: register SharingModule which sets up routing, scoring, QSim components, etc.
 		controler.addOverridingModule(new SharingModule());
-
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
@@ -112,6 +117,36 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 					));
 			}
 		});
+
+		// Define a custom MainModeIdentifier to include sharing_roller
+		MainModeIdentifier customIdentifier = tripElements -> {
+			for (PlanElement pe : tripElements) {
+				if (pe instanceof Leg) {
+					String mode = ((Leg) pe).getMode();
+					if ("sharing_roller".equals(mode)) {
+						return "sharing_roller";
+					}
+				}
+			}
+			return "unknown"; // fallback 避免崩溃
+		};
+
+
+		// Bind MainModeIdentifier
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				bind(MainModeIdentifier.class).toInstance(customIdentifier);
+			}
+		});
+
+
+
+		// Register silent listener to avoid crash from ModeChoiceCoverageControlerListener
+		controler.addControlerListener(new SilentModeChoiceCoverageListener(
+			customIdentifier,
+			controler.getScenario().getPopulation()
+		));
 
 		// Add shared mobility QSim components
 		SharingConfigGroup sharingConfig = ConfigUtils.addOrGetModule(controler.getConfig(), SharingConfigGroup.class);

@@ -86,6 +86,22 @@
 		<param name="coordDistance" value="100"/>
 	</module>
 
+	<module name="swissRailRaptor">
+		<param name="useIntermodalAccessEgress" value="true" />
+
+		<parameterset type="intermodalAccessEgress">
+			<param name="mode" value="walk" />
+			<param name="initialSearchRadius" value="1000" />
+			<param name="maxRadius" value="2000" />
+		</parameterset>
+
+		<parameterset type="intermodalAccessEgress">
+			<param name="mode" value="sharing_roller" />
+			<param name="initialSearchRadius" value="1000" />
+			<param name="maxRadius" value="5000" />
+		</parameterset>
+	</module>
+
 	<module name="simwrapper" >
 		<param name="sampleSize" value="0.1" />
 
@@ -100,7 +116,7 @@
 			<param name="mapCenter" value="13.24,52.55" />
 			<param name="mapZoomLevel" value="14.2" />
 			<!-- Make sure this shp file is present relative to the config path -->
-			<param name="shp" value="./area/gartenfeld.gpkg" />
+			<param name="shp" value="./area/gartenfeld-shape.shp" />
 		</parameterset>
 	</module>
 
