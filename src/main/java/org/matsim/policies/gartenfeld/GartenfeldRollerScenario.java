@@ -16,11 +16,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.RoutingConfigGroup;
 import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.replanning.modules.SubtourModeChoice;
-import org.matsim.core.router.DefaultAnalysisMainModeIdentifier;
-import org.matsim.core.router.MainModeIdentifier;
-import org.matsim.core.router.RoutingModule;
-import org.matsim.core.router.TeleportationRoutingModule;
+import org.matsim.core.router.*;
 import org.matsim.core.controler.AbstractModule;
 
 import java.util.ArrayList;
@@ -46,14 +42,11 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
     @Override
     protected void prepareScenario(Scenario scenario) {
         super.prepareScenario(scenario);
-
     }
 
     @Override
     protected Config prepareConfig(Config config) {
 		config = super.prepareConfig(config);
-		// Disable default listeners that crash on unknown modes
-		config.controller().setCreateGraphs(false);
 
 		// Add sharing config module
 		SharingConfigGroup sharingConfig = new SharingConfigGroup();
@@ -66,9 +59,11 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 		serviceConfig.setMaximumAccessEgressDistance(2000);
 		serviceConfig.setServiceInputFile("shared_roller_vehicles_stations.xml");
 		serviceConfig.setMode("roller");
-		serviceConfig.setBaseFare(0.75);
+		//serviceConfig.setBaseFare(0.75);
+		serviceConfig.setBaseFare(0.0);
 		serviceConfig.setTimeFare(0.0);
-		serviceConfig.setDistanceFare(0.0008);
+		//serviceConfig.setDistanceFare(0.0008);
+		serviceConfig.setDistanceFare(0.00033);
 
 		sharingConfig.addService(serviceConfig);
 
@@ -102,7 +97,7 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
     @Override
     protected void prepareControler(Controler controler) {
         super.prepareControler(controler);
-		// Important: register SharingModule which sets up routing, scoring, QSim components, etc.
+		// register SharingModule which sets up routing, scoring, QSim components, etc.
 		controler.addOverridingModule(new SharingModule());
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
@@ -118,33 +113,17 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 			}
 		});
 
-		// Define a custom MainModeIdentifier to include sharing_roller
-		MainModeIdentifier customIdentifier = tripElements -> {
-			for (PlanElement pe : tripElements) {
-				if (pe instanceof Leg) {
-					String mode = ((Leg) pe).getMode();
-					if ("sharing_roller".equals(mode)) {
-						return "sharing_roller";
-					}
-				}
-			}
-			return "unknown"; // fallback 避免崩溃
-		};
-
-
-		// Bind MainModeIdentifier
+		// MainModeIdentifier with fallback and delegation
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				bind(MainModeIdentifier.class).toInstance(customIdentifier);
+				bind(MainModeIdentifier.class).to(CustomAnalysisMainModeIdentifier.class);
+				bind(AnalysisMainModeIdentifier.class).to(CustomAnalysisMainModeIdentifier.class);
 			}
 		});
 
-
-
-		// Register silent listener to avoid crash from ModeChoiceCoverageControlerListener
 		controler.addControlerListener(new SilentModeChoiceCoverageListener(
-			customIdentifier,
+			new CustomAnalysisMainModeIdentifier(),
 			controler.getScenario().getPopulation()
 		));
 
@@ -153,6 +132,23 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 		controler.configureQSimComponents(SharingUtils.configureQSim(sharingConfig));
 
     }
+
+	// Custom class for identifying sharing_roller
+	public static class CustomAnalysisMainModeIdentifier implements AnalysisMainModeIdentifier {
+		private final DefaultAnalysisMainModeIdentifier delegate = new DefaultAnalysisMainModeIdentifier();
+
+		@Override
+		public String identifyMainMode(List<? extends PlanElement> tripElements) {
+			for (PlanElement pe : tripElements) {
+				if (pe instanceof Leg leg) {
+					if ("sharing_roller".equals(leg.getMode())) {
+						return "sharing_roller";
+					}
+				}
+			}
+			return delegate.identifyMainMode(tripElements);
+		}
+	}
 
 
 }
