@@ -1,7 +1,5 @@
 package org.matsim.policies.gartenfeld;
 
-//import com.google.inject.AbstractModule;
-import com.google.inject.Provider;
 import com.google.inject.name.Names;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
@@ -59,11 +57,11 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 		serviceConfig.setMaximumAccessEgressDistance(2000);
 		serviceConfig.setServiceInputFile("shared_roller_vehicles_stations.xml");
 		serviceConfig.setMode("roller");
-		//serviceConfig.setBaseFare(0.75);
-		serviceConfig.setBaseFare(0.0);
+		serviceConfig.setBaseFare(0.75);
+		//serviceConfig.setBaseFare(0.0);
 		serviceConfig.setTimeFare(0.0);
-		//serviceConfig.setDistanceFare(0.0008);
-		serviceConfig.setDistanceFare(0.00033);
+		serviceConfig.setDistanceFare(0.0008);
+		//serviceConfig.setDistanceFare(0.00033);
 
 		sharingConfig.addService(serviceConfig);
 
@@ -139,13 +137,19 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 
 		@Override
 		public String identifyMainMode(List<? extends PlanElement> tripElements) {
+			// Priority 1: If the trip includes any leg using pt, return "pt"
 			for (PlanElement pe : tripElements) {
-				if (pe instanceof Leg leg) {
-					if ("sharing_roller".equals(leg.getMode())) {
-						return "sharing_roller";
-					}
+				if (pe instanceof Leg leg && "pt".equals(leg.getMode())) {
+					return "pt";
 				}
 			}
+			// Priority 2: If the trip includes any leg using sharing_roller, return "sharing_roller"
+			for (PlanElement pe : tripElements) {
+				if (pe instanceof Leg leg && "sharing_roller".equals(leg.getMode())) {
+					return "sharing_roller";
+				}
+			}
+			// Fallback: Use default delegate
 			return delegate.identifyMainMode(tripElements);
 		}
 	}
