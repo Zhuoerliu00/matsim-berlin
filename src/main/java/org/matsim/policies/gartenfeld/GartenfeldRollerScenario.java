@@ -21,6 +21,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This class defines and runs a MATSim scenario for the Gartenfeld area with integrated station-based
+ * shared e-scooter ("sharing_roller") services. It extends the base `GartenfeldScenario` and enhances it
+ * by configuring a multimodal simulation that includes public transport, car, walking, biking, and
+ * shared micromobility.
+
+ * Key functionalities:
+ * - Configures a station-based scooter-sharing service using `SharingServiceConfigGroup`.
+ * - Registers the `sharing_roller` mode as a teleportation-based routing mode with specified speed and distance factor.
+ * - Adds relevant mode scoring and non-scoring activity types for booking/pick-up/drop-off phases.
+ * - Integrates a custom `MainModeIdentifier` prioritizing `pt` and `sharing_roller` for intermodal trip detection.
+ * - Installs the `SharingModule` for enabling simulation components and logic for shared mobility.
+ * - Supports evaluation of how the presence of shared e-scooters influences mode choices in the urban network.
+
+ * This setup is intended for use in research and planning applications analyzing intermodal behavior,
+ * especially regarding first-/last-mile connections with shared micromobility in dense urban contexts.
+ */
 
 public class GartenfeldRollerScenario extends GartenfeldScenario {
     public static void main(String[] args) {
@@ -58,10 +75,8 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 		serviceConfig.setServiceInputFile("shared_roller_vehicles_stations.xml");
 		serviceConfig.setMode("roller");
 		serviceConfig.setBaseFare(0.75);
-		//serviceConfig.setBaseFare(0.0);
-		serviceConfig.setTimeFare(0.0);
-		serviceConfig.setDistanceFare(0.0008);
-		//serviceConfig.setDistanceFare(0.00033);
+		serviceConfig.setTimeFare(0.24);
+		serviceConfig.setDistanceFare(0.0);
 
 		sharingConfig.addService(serviceConfig);
 
