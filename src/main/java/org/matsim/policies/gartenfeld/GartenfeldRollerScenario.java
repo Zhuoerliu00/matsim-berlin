@@ -44,7 +44,6 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 
         MATSimApplication.runWithDefaults(GartenfeldRollerScenario.class, args,
 			"--parking-garages", "NO_GARAGE",
-			"--config:network.inputChangeEventsFile", "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/gartenfeld/input/gartenfeld-v6.4.network-change-events.xml.gz",
 			"--config:facilities.inputFacilitiesFile", "./berlin-v6.4-facilities.xml.gz",
 			"--config:controller.runId", "gartenfeld-v6.4.full-roller-1pct",
 			"--config:network.inputNetworkFile", "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/gartenfeld/input/gartenfeld-v6.4.network.xml.gz",
