@@ -6,10 +6,11 @@
 		<artifactId>matsim-all</artifactId>
 
 		<!-- PR-labelled release -->
-		<version>2025.0-PR3746</version>
+<!--		<version>2025.0-PR3862</version>-->
+		<version>2026.0-PR4154</version>
 
 		<!-- snapshot == not recommended: rather use PR-labelled release!-->
-<!--		<version>2025.0-SNAPSHOT</version>-->
+<!--		<version>2026.0-SNAPSHOT</version>-->
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>

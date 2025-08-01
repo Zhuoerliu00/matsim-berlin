@@ -38,19 +38,10 @@
 			<param name="mapCenter" value="13.24,52.55" />
 			<param name="mapZoomLevel" value="14.2" />
 			<!-- Make sure this shp file is present relative to the config path -->
-			<param name="shp" value="./area/gartenfeld.gpkg" />
+			<param name="shp" value="./area/gartenfeld-shape.shp" />
 		</parameterset>
 	</module>
 
-	<module name="strategy">
-		<parameterset type="strategysettings">
-			<param name="strategyName" value="ChangeExpBeta"/>
-			<param name="weight" value="0.7"/>
-		</parameterset>
-		<parameterset type="strategysettings">
-			<param name="strategyName" value="ReRoute"/>
-			<param name="weight" value="0.3"/>
-		</parameterset>
-	</module>
+
 
 </config>
