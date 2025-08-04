@@ -1,4 +1,4 @@
-package org.matsim.policies.gartenfeld;
+package org.matsim.run.gartenfeld;
 
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.controler.OutputDirectoryHierarchy;

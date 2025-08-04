@@ -1,10 +1,8 @@
-package org.matsim.policies.gartenfeld;
+package org.matsim.run.gartenfeld;
 
-import com.google.inject.name.Names;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.application.MATSimApplication;
 import org.matsim.contrib.shared_mobility.run.SharingConfigGroup;
 import org.matsim.contrib.shared_mobility.run.SharingModule;
 import org.matsim.contrib.shared_mobility.run.SharingServiceConfigGroup;
@@ -42,7 +40,7 @@ import java.util.List;
 public class GartenfeldRollerScenario extends GartenfeldScenario {
     public static void main(String[] args) {
 
-        MATSimApplication.runWithDefaults(GartenfeldRollerScenario.class, args,
+        runWithDefaults(GartenfeldRollerScenario.class, args,
 			"--parking-garages", "NO_GARAGE",
 			"--config:facilities.inputFacilitiesFile", "./berlin-v6.4-facilities.xml.gz",
 			"--config:controller.runId", "gartenfeld-v6.4.full-roller-1pct",
@@ -114,14 +112,14 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				bind(RoutingModule.class)
+				/*bind(RoutingModule.class)
 					.annotatedWith(Names.named("roller"))
 					.toProvider(() -> new TeleportationRoutingModule(
 						"sharing_roller",
 						controler.getScenario(),
 						5.0, // speed
 						1.3  // beeline distance factor
-					));
+					));*/
 			}
 		});
 
