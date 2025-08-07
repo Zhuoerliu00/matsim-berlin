@@ -60,7 +60,7 @@ public class PrepareTransitSchedule implements MATSimAppCommand {
 		for (TransitStopFacility stop : transitSchedule.getFacilities().values()) {
 			if (MGC.coord2Point(stop.getCoord()).within(intermodalArea)) {
 				//maybe add another filter (e.g. only train station, long distance bus stop...)
-				stop.getAttributes().putAttribute("allowDrtAccessEgress", "true");
+				stop.getAttributes().putAttribute("allowRollerAccessEgress", "true");
 			}
 		}
 	}
