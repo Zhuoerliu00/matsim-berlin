@@ -14,8 +14,11 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.network.algorithms.MultimodalNetworkCleaner;
 import org.matsim.core.population.algorithms.ParallelPersonAlgorithmUtils;
+import org.matsim.core.router.AnalysisMainModeIdentifier;
+import org.matsim.core.router.MainModeIdentifier;
 import org.matsim.core.router.MultimodalLinkChooser;
 import org.matsim.core.router.MultimodalLinkChooserDefaultImpl;
+import org.matsim.core.router.util.TravelTime;
 import org.matsim.run.OpenBerlinScenario;
 import picocli.CommandLine;
 
@@ -30,7 +33,7 @@ import java.util.Set;
  */
 public class GartenfeldScenario extends OpenBerlinScenario {
 
-	@CommandLine.Option(names = "--gartenfeld-config", description = "Path to configuration for Gartenfeld.", defaultValue = "input/gartenfeld/gartenfeld-cutout.config.xml")
+	@CommandLine.Option(names = "--gartenfeld-config", description = "Path to configuration for Gartenfeld.", defaultValue = "input/gartenfeld/gartenfeld-cutout.configr5.xml")
 	private String gartenFeldConfig;
 
 	@CommandLine.Option(names = "--gartenfeld-shp", description = "Path to configuration for Gartenfeld.", defaultValue = "input/gartenfeld/DNG_area.gpkg")
@@ -39,6 +42,8 @@ public class GartenfeldScenario extends OpenBerlinScenario {
 	@CommandLine.Option(names = "--parking-garages", description = "Enable parking garages.", defaultValue = "NO_GARAGE")
 	private GarageType garageType = GarageType.NO_GARAGE;
 
+	private static final double ROLLER_VMAX_MPS = 3.33; // 12 km/h
+	private static final String ROLLER = "roller";
 		public static void main(String[] args) {
 		MATSimApplication.run(GartenfeldScenario.class, args);
 	}
@@ -96,6 +101,18 @@ public class GartenfeldScenario extends OpenBerlinScenario {
 	protected void prepareControler(Controler controler) {
 
 		super.prepareControler(controler);
+		// Bind a TravelTime for roller so routing uses min(speed 12 km/h)
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				addTravelTimeBinding(ROLLER).toInstance((TravelTime) (link, time, person, vehicle) -> {
+					double v = Math.min(link.getFreespeed(time), ROLLER_VMAX_MPS);
+					// avoid division by zero if freespeed was pathological
+					if (v <= 0.1) v = 0.1;
+					return link.getLength() / v;
+				});
+			}
+		});
 
 		// Only with the car free area, the multimodal link chooser is needed
 		if (garageType == GarageType.ONE_LINK)
@@ -106,6 +123,20 @@ public class GartenfeldScenario extends OpenBerlinScenario {
 					bind(MultimodalLinkChooser.class).toInstance(new GartenfeldLinkChooser(ShpOptions.ofLayer(gartenFeldArea, null)));
 				}
 			});
+
+		// MainModeIdentifier with fallback and delegation
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				bind(MainModeIdentifier.class).to(GartenfeldRollerScenario.CustomAnalysisMainModeIdentifier.class);
+				bind(AnalysisMainModeIdentifier.class).to(GartenfeldRollerScenario.CustomAnalysisMainModeIdentifier.class);
+			}
+		});
+
+		controler.addControlerListener(new SilentModeChoiceCoverageListener(
+			new GartenfeldRollerScenario.CustomAnalysisMainModeIdentifier(),
+			controler.getScenario().getPopulation()
+		));
 	}
 
 	/**

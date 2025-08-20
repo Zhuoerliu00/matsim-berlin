@@ -1,5 +1,6 @@
 package org.matsim.run.gartenfeld;
 
+import com.google.inject.name.Names;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.PlanElement;
@@ -40,15 +41,7 @@ import java.util.List;
 public class GartenfeldRollerScenario extends GartenfeldScenario {
     public static void main(String[] args) {
 
-        runWithDefaults(GartenfeldRollerScenario.class, args,
-			"--parking-garages", "NO_GARAGE",
-			"--config:facilities.inputFacilitiesFile", "./berlin-v6.4-facilities.xml.gz",
-			"--config:controller.runId", "gartenfeld-v6.4.full-roller-1pct",
-			"--config:network.inputNetworkFile", "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/gartenfeld/input/gartenfeld-v6.4.network.xml.gz",
-			"--config:plans.inputPlansFile", "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/gartenfeld/input/gartenfeld-v6.4.population-full-1pct.xml.gz",
-			"--config:controller.lastIteration", "5",
-			"--config:controller.outputDirectory", "output/gartenfeld-v6.4.full-roller-1pct-test/"
-        );
+        runWithDefaults(GartenfeldRollerScenario.class, args);
     }
 
     @Override
@@ -69,7 +62,7 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 		serviceConfig.setId("roller");
 		serviceConfig.setServiceScheme(SharingServiceConfigGroup.ServiceScheme.StationBased);
 		serviceConfig.setMaximumAccessEgressDistance(2000);
-		serviceConfig.setServiceInputFile("shared_roller_vehicles_stations.xml");
+		serviceConfig.setServiceInputFile("/net/ils/zliu/input/gartenfeld/shared_roller_vehicles_stations.xml");
 		serviceConfig.setMode("roller");
 		serviceConfig.setBaseFare(0.75);
 		serviceConfig.setTimeFare(0.24);
@@ -83,6 +76,7 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 		sharedRoutingParams.setTeleportedModeSpeed(5.0);
 		sharedRoutingParams.setBeelineDistanceFactor(1.3);
 		config.routing().addTeleportedModeParams(sharedRoutingParams);
+
 
 		// Add the shared mode to mode choice
 		List<String> modes = new ArrayList<>(Arrays.asList(config.subtourModeChoice().getModes()));
@@ -112,14 +106,15 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				/*bind(RoutingModule.class)
+				bind(RoutingModule.class)
 					.annotatedWith(Names.named("roller"))
 					.toProvider(() -> new TeleportationRoutingModule(
 						"sharing_roller",
 						controler.getScenario(),
 						5.0, // speed
-						1.3  // beeline distance factor
-					));*/
+						1.3,  // beeline distance factor
+						null
+					));
 			}
 		});
 
@@ -159,6 +154,12 @@ public class GartenfeldRollerScenario extends GartenfeldScenario {
 			for (PlanElement pe : tripElements) {
 				if (pe instanceof Leg leg && "sharing_roller".equals(leg.getMode())) {
 					return "sharing_roller";
+				}
+			}
+			// Priority 3: If the trip includes any leg using roller, return "roller"
+			for (PlanElement pe : tripElements) {
+				if (pe instanceof Leg leg && "roller".equals(leg.getMode())) {
+					return "roller";
 				}
 			}
 			// Fallback: Use default delegate
