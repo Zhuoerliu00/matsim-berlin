@@ -50,7 +50,7 @@ public class GartenfeldSharingRollerScenario extends GartenfeldScenario {
 		service.setMaximumAccessEgressDistance(2000);
 		service.setMode(BASE_MODE); // Key: use "roller" as the base mode (analogous to "car" in the example)
 		service.setBaseFare(0.75);
-		service.setTimeFare(0.24);
+		service.setTimeFare(0.004);
 		service.setDistanceFare(0.0);
 		sharingCfg.addService(service);
 
@@ -66,12 +66,12 @@ public class GartenfeldSharingRollerScenario extends GartenfeldScenario {
 
 		// Optional: if you keep roller out of QSim (route-only, no execution), you may control leg time via teleported speed.
 		// (I.e., network is used at routing, but execution remains teleported. To move into QSim, see a separate switch.)
-		/*
-		 RoutingConfigGroup.TeleportedModeParams tp = new RoutingConfigGroup.TeleportedModeParams(SERVICE_MODE);
-		 tp.setTeleportedModeSpeed(5.56);
+/*
+		 RoutingConfigGroup.TeleportedModeParams tp = new RoutingConfigGroup.TeleportedModeParams(BASE_MODE);
+		 tp.setTeleportedModeSpeed(3.33);
 		 tp.setBeelineDistanceFactor(1.4353);
 		 config.routing().addTeleportedModeParams(tp);
-		 */
+*/
 
 		// 3) Mode choice: include the service mode (as in the official example)
 		List<String> modes = new ArrayList<>(Arrays.asList(config.subtourModeChoice().getModes()));
@@ -93,6 +93,7 @@ public class GartenfeldSharingRollerScenario extends GartenfeldScenario {
 			config.scoring().addModeParams(mp);
 		}
 
+
 		return config;
 	}
 
@@ -113,10 +114,10 @@ public class GartenfeldSharingRollerScenario extends GartenfeldScenario {
 				bind(RoutingModule.class)
 					.annotatedWith(Names.named("roller"))
 					.toProvider(() -> new TeleportationRoutingModule(
-						"sharing_roller",
+						"roller",
 						controler.getScenario(),
-						5.0, // speed
-						1.3,  // beeline distance factor
+						3.33, // speed
+						1.4353,  // beeline distance factor
 						null
 					));
 			}
